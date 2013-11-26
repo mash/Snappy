@@ -24,8 +24,7 @@ PARTNO     = t13
 MCU        = attiny13
 # 9.6MHz divided by 8
 CLOCK      = 1200000
-PROGRAMMER = -c avrispmkII
-# PROGRAMMER = #-c stk500v2 -P avrdoper
+PROGRAMMER = -c avrispmkII -P usb
 OBJECTS    = main.o
 FUSES      = -U hfuse:w:0xFF:m -U lfuse:w:0x6A:m
 
