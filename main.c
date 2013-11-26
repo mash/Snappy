@@ -21,7 +21,7 @@ void setup_pins () {
     // GND ~ VCC
 
     // pin5 is digital out
-    DDRB |= _BV( PB0 );
+    DDRB |= _BV( DDB0 );
 }
 
 int main(void)
@@ -29,10 +29,10 @@ int main(void)
     setup_pins();
 
     for (;;) {
-        PORTB |=  _BV( PB0 );
+        PORTB |=  _BV( PORTB0 );
         _delay_ms(200);
 
-        PORTB &=~ _BV( PB0 );
+        PORTB &=~ _BV( PORTB0 );
         _delay_ms(200);
     }
     return 0;   /* never reached */
