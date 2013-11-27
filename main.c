@@ -32,8 +32,24 @@ void setup_pins () {
     ADCSRA |=  _BV( ADEN );  // enable
     ADCSRA |=  _BV( ADSC );  // start conversion
 
-    // pin5 is digital out
+    // pin5 is OC0A (output compare output)
+    // use Timer/Counter0's CTC (Clear Timer on Compare) mode
+    // fOCnx = fclk / (2 x N x (1 + OCRnx))
+    // fOC0A = 9.6MHz / (2 x 8 x 1)   = 600kHz
+    // fOC0A = 9.6MHz / (2 x 8 x 256) = 2.3kHz
+    // fOC0A = 9.6MHz / (2 x 64 x 1)   = 75kHz
+    // fOC0A = 9.6MHz / (2 x 64 x 256) = 293Hz
     DDRB |= _BV( DDB0 );
+    TCCR0A &=~ _BV( COM0A1 ); // Clear OC0A on Compare Match
+    TCCR0A |=  _BV( COM0A0 );
+    TCCR0A |=  _BV( WGM01 ); // CTC mode
+    TCCR0A &=~ _BV( WGM00 );
+    TCCR0B &=~ _BV( WGM02 );
+    TCCR0B &=~ _BV( CS02 );
+    TCCR0B |=  _BV( CS01 );
+    // TCCR0B |=  _BV( CS00 ); // clkIO/64
+    TCCR0B &=~ _BV( CS00 ); // clkIO/8
+    OCR0A   =  128; // Output compare register
 }
 
 uint8_t readADC() {
@@ -53,34 +69,16 @@ void delay_ms(uint8_t ms) {
     }
 }
 
-void delay_us(uint16_t us) {
-    uint16_t i;
-    for (i=0; i<us; i++) {
-        _delay_us(1);
-    }
-}
-
-/*
- 0-255 [-] -> 50 - 5000 [us] -> 20k - 200 [Hz]
- return 25-2575
- */
-uint16_t toMicroSecond(uint8_t input) {
-    return 25 + ((uint16_t)(input) * 10);
-}
-
 int main(void)
 {
     setup_pins();
 
     for (;;) {
         uint8_t pin3 = readADC();
-        uint16_t us  = toMicroSecond(pin3);
 
-        PORTB |=  _BV( PORTB0 );
-        delay_us(us);
+        OCR0A = pin3; // Output compare register
 
-        PORTB &=~ _BV( PORTB0 );
-        delay_us(us);
+        delay_ms(10);
     }
-    return 0;   /* never reached */
+    return 0;
 }
