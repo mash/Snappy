@@ -49,8 +49,23 @@ uint8_t readADC() {
 void delay_ms(uint8_t ms) {
     uint8_t i;
     for (i=0; i<ms; i++) {
-        _delay_ms(1);
+        _delay_us(1);
     }
+}
+
+void delay_us(uint16_t us) {
+    uint16_t i;
+    for (i=0; i<us; i++) {
+        _delay_us(1);
+    }
+}
+
+/*
+ 0-255 [-] -> 50 - 5000 [us] -> 20k - 200 [Hz]
+ return 25-2575
+ */
+uint16_t toMicroSecond(uint8_t input) {
+    return 25 + ((uint16_t)(input) * 10);
 }
 
 int main(void)
@@ -59,12 +74,13 @@ int main(void)
 
     for (;;) {
         uint8_t pin3 = readADC();
+        uint16_t us  = toMicroSecond(pin3);
 
         PORTB |=  _BV( PORTB0 );
-        delay_ms(pin3);
+        delay_us(us);
 
         PORTB &=~ _BV( PORTB0 );
-        delay_ms(pin3);
+        delay_us(us);
     }
     return 0;   /* never reached */
 }
